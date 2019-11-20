@@ -1,0 +1,79 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Nov 19 13:16:17 2019
+
+@author: dell
+"""
+
+import numpy as np
+import pandas as pd
+import csv
+import os
+
+idir= os.getcwd()
+for root, dirs, files in os.walk(idir):
+    for filename in files:
+        ####读入数据
+        headers=['x','y','h2','temp','o2','nxc7h16','ch4','ch2oh','c2h2','n2','co2','h2o','oh','h2o2','co',\
+                 'h','ch','hco','txch2','ch3','c2h4','pxch2','ch2o','o','ch3o','c2h6','ho2','c2h3',\
+                 'c2h5','c3h4','c3h5','c3h6','nxc3h7','pxc4h8','hcco','pxc5h11','c6h11','pxc6h12',\
+                 'pxc7h15','sxc7h15','pxc4h9','pc7h15o2','pheoohx2','soo7ooh1','px2heooh','oc7ooh',\
+                 'px2hepoo','xi','dtx','dty','grad_T','dxix','dxiy','SDR']
+        outputdata=pd.read_csv(filename,sep=',',header=None,names=headers)
+        outputdata['pressure']=40000000
+        add=['fasdfadsf asdfas','fasdf  dfgfds','sdgf fdsgsdg','cells 4194304','sadfasgfsfg','variable','endvars']
+###重新排序
+        head=["pressure","temp",'nxc7h16','ch4','o2','n2','co2','h2o','h2','oh','h2o2','co',\
+               'h','ch','hco','ch2oh','txch2','c2h2','ch3','c2h4','pxch2','ch2o','o','ch3o','c2h6','ho2',\
+               'c2h3','c2h5','c3h4','c3h5','c3h6','nxc3h7','pxc4h8','hcco','pxc5h11','c6h11','pxc6h12',\
+               'pxc7h15','sxc7h15','pxc4h9','pc7h15o2','pheoohx2','soo7ooh1','px2heooh','oc7ooh','px2hepoo']
+        head1=["pressure ","temp ",'nxc7h16 ','ch4 ','o2 ','n2 ','co2 ','h2o ','h2 ','oh ','h2o2 ','co ',\
+              'h ','ch ','hco ','ch2oh ','txch2 ','c2h2 ','ch3 ','c2h4 ','pxch2 ','ch2o ','o ','ch3o ','c2h6 ','ho2 ',\
+              'c2h3 ','c2h5 ','c3h4 ','c3h5 ','c3h6 ','nxc3h7 ','pxc4h8 ','hcco ','pxc5h11 ','c6h11 ','pxc6h12 ',\
+              'pxc7h15 ','sxc7h15 ','pxc4h9 ','pc7h15o2 ','pheoohx2 ','soo7ooh1 ','px2heooh ','oc7ooh ','px2hepoo ']
+        df_out=outputdata[head] #需要的参数
+        del outputdata
+        df=df_out.T
+        #pd.set_option('display.float_format',lambda x: '%.5e' % x )
+        arrays=df.values
+########输出到csv
+        array1=(['fasdfadsf asdfas'],['fasdf  dfgfds'],['sdgf fdsgsdg'],['cells 4194304'],['sadfasgfsfg'],['variable'])
+        df_out=pd.DataFrame(array1)
+        df_out.to_csv(idir+'\out'+filename,header=None,index=None,encoding='utf-8')
+#################
+        '''
+        arrays_all=arrays[0]
+        arrays_popout=arrays_all[-4:]
+        arrays_remain=arrays_all[:4194300]
+        arrays_reshape=arrays_remain.reshape(419430,10)
+        arrayhead=[head[0]]
+        df_head=pd.DataFrame(arrayhead)
+        df_reshape=pd.DataFrame(arrays_reshape)
+        df_popout=pd.DataFrame([arrays_popout])
+        df_all=pd.concat([df_head,df_reshape,df_popout],axis=0,ignore_index=True)
+        df_all.to_csv('df.csv',sep='\t',float_format='{%.5e}',header=None,index=None,mode='a+',encoding='utf-8')
+        '''
+#####################循环写入
+        for i in range(46):
+            arrays_all=arrays[i]
+            arrays_popout=arrays_all[-4:]
+            arrays_remain=arrays_all[:4194300]
+            arrays_reshape=arrays_remain.reshape(419430,10)
+            with open(idir+'\out'+filename,"a+",newline='') as csvfile: 
+                writer = csv.writer(csvfile)
+                writer.writerow([head1[i]]) 
+            ###
+            df_reshape=pd.DataFrame(arrays_reshape,dtype=np.float)
+            df_reshape.reset_index(drop=False,inplace = True)#加一列
+            df_reshape['index']=None
+            df_reshape.to_csv(idir+'\out'+filename,sep='\t',float_format='%.5e',header=None,index=None,mode='a+',encoding='utf-8')
+            ###
+            df_popout=pd.DataFrame([arrays_popout],dtype=np.float)
+            df_popout.reset_index(drop=False,inplace = True)#加一列
+            df_popout['index']=None
+            df_popout.to_csv(idir+'\out'+filename,sep='\t',float_format='%.5e',header=None,index=None,mode='a+',encoding='utf-8')
+            ###
+#################
+        with open(idir+'\out'+filename,"a+",newline='') as csvfile1:
+            write1 = csv.writer(csvfile1)
+            write1.writerow(["endvars "])
